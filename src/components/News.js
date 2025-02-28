@@ -307,6 +307,7 @@ export class News extends Component {
     this.state = {
       articles: this.article,
       loading: false,
+      page: 1,
     };
   }
 
@@ -315,17 +316,47 @@ export class News extends Component {
     let data = await fetch(url);
     let parsedData = await data.json();
     console.log(parsedData);
-    this.setState({ articles: parsedData.articles });
+    this.setState({
+      articles: parsedData.articles,
+      totalArticles: parsedData.totalResults,
+    });
   }
+
+  handleNextClick = async () => {
+    console.log("Next");
+    if (this.state.page + 1 > Math.ceil(this.state.totalArticles / 20)) {
+    } else {
+      let url = `https://newsapi.org/v2/top-headlines?country=us&apiKey=ee1199b03eeb4cb2b7c4d95555f051c3&page=${
+        this.state.page + 1
+      }&pageSize=20`;
+      let data = await fetch(url);
+      let parsedData = await data.json();
+      console.log(parsedData);
+      this.setState({
+        articles: parsedData.articles,
+        page: this.state.page + 1,
+      });
+    }
+  };
+  handlePrevClick = async () => {
+    console.log("Previous");
+    let url = `https://newsapi.org/v2/top-headlines?country=us&apiKey=ee1199b03eeb4cb2b7c4d95555f051c3&page=${
+      this.state.page - 1
+    }&pageSize=20`;
+    let data = await fetch(url);
+    let parsedData = await data.json();
+    console.log(parsedData);
+    this.setState({ articles: parsedData.articles, page: this.state.page - 1 });
+  };
 
   render() {
     return (
-      <div container="container my-3">
-        <h2>NewsMonkey- Top Headlines</h2>
-        <div className="row">
+      <div className="container text-center d-flex flex-column align-items-center my-4 ">
+        <h1>NewsMonkey- Top Headlines</h1>
+        <div className="row mt-5 mb-4">
           {this.state.articles.map((element) => {
             return (
-              <div className="col-md-4" key={element.url}>
+              <div className="col-md-4 mt-4" key={element.url}>
                 <NewsItem
                   title={element.title.slice(0, 45)}
                   description={
@@ -341,6 +372,23 @@ export class News extends Component {
               </div>
             );
           })}
+        </div>
+        <div className="container d-flex justify-content-between">
+          <button
+            disabled={this.state.page <= 1}
+            type="button"
+            className="btn btn-dark"
+            onClick={this.handlePrevClick}
+          >
+            &larr; Previous
+          </button>
+          <button
+            type="button"
+            className="btn btn-dark"
+            onClick={this.handleNextClick}
+          >
+            Next &rarr;
+          </button>
         </div>
       </div>
     );
